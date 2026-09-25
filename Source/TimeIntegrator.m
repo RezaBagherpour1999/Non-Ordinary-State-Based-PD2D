@@ -1,13 +1,14 @@
-
 % ========================================================================
-% Copyright (c) 2022 by Oak Ridge National Laboratory                      
-% All rights reserved.                                                     
-%                                                                           
-% This file is part of PDMATLAB2D. PDMATLAB2D is distributed under a           
-% BSD 3-clause license. For the licensing terms see the LICENSE file in    
-% the top-level directory.                                                 
-%                                                                          
-% SPDX-License-Identifier: BSD-3-Clause                                    
+% Copyright (c) 2022 by Oak Ridge National Laboratory
+% Modifications Copyright (c) 2026 by Reza Bagherpour
+% All rights reserved.
+%
+% This file is part of NOSB-PD2D (extended from PDMATLAB2D).
+%
+% Distributed under a BSD 3-clause license. For the licensing terms see 
+% the LICENSE file in the top-level directory.
+%
+% SPDX-License-Identifier: BSD-3-Clause
 % ========================================================================
 
 % ========================================================================
@@ -16,55 +17,58 @@
 
 % Input
 % -----
-% TimeScheme  : time-integration scheme 'VVerlet'
-%               'VVerlet': velocity Verlet
-% xx          : x coordinates of all nodes in the grid 
-% yy          : y coordinates of all nodes in the grid 
-% v           : displacement of each node in the x-direction (at time t)
-% w           : displacement of each node in the y-direction (at time t)
-% Vv          : x-component of velocity for all nodes (at time t)
-% Vw          : y-component of velocity for all nodes (at time t)
-% Fv          : x-component of internal force density for all nodes (at time t)
-% Fw          : y-component of internal force density for all nodes (at time t)
-% bv          : x-component of body force density for all nodes (at time t)
-% bw          : y-component of body force density for all nodes (at time t)
-% t           : time
-% bvfunc      : function for the x-component of body force density
-% bwfunc      : function for the y-component of body force density
-% dt          : time step
-% u_NA        : array of neighbor numbers for all nodes (at time t)
-% IF_NA       : array of influence function values of neighbor bonds for all nodes 
-% V_NA        : array of neighbor areas for all nodes 
-% r_hat_NA    : array of reference lengths of neighbor bonds for all nodes 
-% x_hat_NA    : array of x-coordinates of quadrature points for all nodes
-% y_hat_NA    : array of y-coordinates of quadrature points for all nodes 
-% rho         : mass density
-% c           : micromodulus constant
-% model       : constitutive model 'GPMB'
-%               'GPMB' : generalized prototype microelastic brittle
-% flag_RDUG   : if == 1, then the grid is uniform over a rectangular domain
-%               (dx = dy); the flag name RDUG stands for "Rectangular Domain
-%               Uniform Grid" 
-%               if == 0, then the grid is a general grid
-% so          : critical stretch
-% mask_nofail : Boolean array with a value of 1 for cells in a no-fail zone
-%               and 0 for the other cells (recall each cell has a node 
-%               associated to it which shares the same number)
-% flag_BB     : if == 1, then the function allows bond breaking
-%               if == 0, then the function does not allow bond breaking
+% c_damp                : artificial/viscous damping coefficient
+% sigma_bond_stretch_ui : array storing failure criterion values (e.g., maximum
+%                         tensile stress) for neighbor bonds of all nodes (at time t)
+% TimeScheme            : time-integration scheme 'VVerlet'
+%                         'VVerlet': velocity Verlet
+% xx                    : x coordinates of all nodes in the grid 
+% yy                    : y coordinates of all nodes in the grid 
+% v                     : displacement of each node in the x-direction (at time t)
+% w                     : displacement of each node in the y-direction (at time t)
+% Vv                    : x-component of velocity for all nodes (at time t)
+% Vw                    : y-component of velocity for all nodes (at time t)
+% E                     : Young's modulus
+% nu                    : Poisson's ratio
+% del                   : peridynamic horizon (delta)
+% Fv                    : x-component of internal force density for all nodes (at time t)
+% Fw                    : y-component of internal force density for all nodes (at time t)
+% bv                    : x-component of body force density for all nodes (at time t)
+% bw                    : y-component of body force density for all nodes (at time t)
+% t                     : time
+% bvfunc                : function for the x-component of body force density
+% bwfunc                : function for the y-component of body force density
+% dt                    : time step
+% u_NA                  : array of neighbor numbers for all nodes (at time t)
+% IF_NA                 : array of influence function values of neighbor bonds for all nodes 
+% V_NA                  : array of neighbor areas for all nodes 
+% x_hat_NA              : array of x-coordinates of quadrature points for all nodes
+% y_hat_NA              : array of y-coordinates of quadrature points for all nodes 
+% rho                   : mass density
+% flag_RDUG             : if == 1, then the grid is uniform over a rectangular domain
+%                         (dx = dy); the flag name RDUG stands for "Rectangular Domain
+%                         Uniform Grid" 
+%                         if == 0, then the grid is a general grid
+% mask_nofail           : Boolean array with a value of 1 for cells in a no-fail zone
+%                         and 0 for the other cells (recall each cell has a node 
+%                         associated to it which shares the same number)
+% flag_BB               : if == 1, then the function allows bond breaking
+%                         if == 0, then the function does not allow bond breaking
 
 % Output
 % ------
-% v           : displacement of each node in the x-direction (at time t+dt)
-% w           : displacement of each node in the y-direction (at time t+dt)
-% Vv          : x-component of velocity for all nodes (at time t+dt)
-% Vw          : y-component of velocity for all nodes (at time t+dt)
-% Fv          : x-component of internal force density for all nodes (at time t+dt)
-% Fw          : y-component of internal force density for all nodes (at time t+dt)
-% bv          : x-component of body force density for all nodes (at time t+dt)
-% bw          : y-component of body force density for all nodes (at time t+dt)
-% W           : macroelastic energy density for all nodes (at time t+dt)    
-% u_NA        : updated array of neighbor numbers for all nodes after possible bond breaking (at time t+dt)
+% v                     : displacement of each node in the x-direction (at time t+dt)
+% w                     : displacement of each node in the y-direction (at time t+dt)
+% Vv                    : x-component of velocity for all nodes (at time t+dt)
+% Vw                    : y-component of velocity for all nodes (at time t+dt)
+% Fv                    : x-component of internal force density for all nodes (at time t+dt)
+% Fw                    : x-component of internal force density for all nodes (at time t+dt)
+% bv                    : x-component of body force density for all nodes (at time t+dt)
+% bw                    : y-component of body force density for all nodes (at time t+dt)
+% W                     : strain energy density for all nodes (at time t+dt)    
+% u_NA                  : updated array of neighbor numbers for all nodes after possible bond breaking (at time t+dt)
+% sigma_bond_stretch_ui : updated array of failure criterion values (e.g., maximum
+%                         tensile stress) for neighbor bonds of all nodes (at time t+dt)
 
 % Discussion:
 % ----------
@@ -84,8 +88,7 @@
 %
 % end
 
-function [v,w,Vv,Vw,Fv,Fw,bv,bw,W,u_NA] = TimeIntegrator(TimeScheme,xx,yy,v,w,Vv,Vw,Fv,Fw,bv,bw,t,bvfunc,bwfunc,dt,u_NA,IF_NA,V_NA,r_hat_NA,x_hat_NA,y_hat_NA,rho,c,model,flag_RDUG,so,mask_nofail,flag_BB)
-
+function [v,w,Vv,Vw,Fv,Fw,bv,bw,W,u_NA,sigma_bond_stretch_ui] = TimeIntegrator(c_damp, sigma_bond_stretch_ui, TimeScheme, xx, yy, v, w, Vv, Vw, E, nu, del, Fv, Fw, bv, bw, t, bvfunc, bwfunc, dt, u_NA, IF_NA, V_NA, x_hat_NA, y_hat_NA, rho, flag_RDUG, mask_nofail, flag_BB)
     % --------------------------------------------------------------------
     %              Velocity Verlet time-integration scheme
     % --------------------------------------------------------------------
@@ -103,10 +106,11 @@ function [v,w,Vv,Vw,Fv,Fw,bv,bw,W,u_NA] = TimeIntegrator(TimeScheme,xx,yy,v,w,Vv
         %
         % Note: updating current positions is equivalent to updating 
         %       displacements, so the implementation below uses displacements
-
+        
+        
         % Step 1: Compute velocity at t+dt/2 for all nodes 
-        V12v = Vv + ((0.5*dt.*(Fv + bv))./rho); % x-component of velocity
-        V12w = Vw + ((0.5*dt.*(Fw + bw))./rho); % y-component of velocity
+        V12v = Vv + ((0.5*dt.*(Fv + bv - c_damp * Vv))./rho); % x-component of velocity
+        V12w = Vw + ((0.5*dt.*(Fw + bw - c_damp * Vw))./rho); % y-component of velocity
  
         % Step 2: Compute displacement at t+dt for all nodes  
         v = v + dt.*V12v; % x-component of displacement
@@ -116,21 +120,21 @@ function [v,w,Vv,Vw,Fv,Fw,bv,bw,W,u_NA] = TimeIntegrator(TimeScheme,xx,yy,v,w,Vv
         if flag_BB == 0
 
         elseif flag_BB == 1
-            [u_NA] = BondBreaking(xx,yy,v,w,so,u_NA,r_hat_NA,x_hat_NA,y_hat_NA,mask_nofail);
+            [u_NA] = BondBreaking(sigma_bond_stretch_ui,xx,yy,v,w,u_NA,x_hat_NA,y_hat_NA,mask_nofail);
         else
             error('flag_BB should be 0 or 1.')
         end
         
         % Compute internal force density and macroelastic energy density at t+dt for all nodes
-        [Fv,Fw,W] = ForceEnergyDensity(xx,yy,v,w,c,u_NA,IF_NA,V_NA,r_hat_NA,x_hat_NA,y_hat_NA,model,flag_RDUG);
+        [Fv, Fw, W, sigma_bond_stretch_ui] = ForceEnergyDensity(xx, yy, v, w, E, nu, u_NA, del, IF_NA, V_NA, x_hat_NA, y_hat_NA,flag_RDUG);
 
         % Compute body force density at t+dt for all nodes 
         bv = bvfunc(xx,yy,t+dt); % x-component of body force density
         bw = bwfunc(xx,yy,t+dt); % y-component of body force density
 
         % Step 3: Compute velocity at t+dt for all nodes 
-        Vv = V12v + ((0.5*dt.*(Fv + bv))./rho);
-        Vw = V12w + ((0.5*dt.*(Fw + bw))./rho);
+        Vv = V12v + ((0.5*dt.*(Fv + bv - c_damp * V12v))./rho);
+        Vw = V12w + ((0.5*dt.*(Fw + bw - c_damp * V12w))./rho);
 
     else
 

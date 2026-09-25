@@ -1,24 +1,44 @@
-# PDMATLAB2D
-## A simple, educational 2D MATLAB implementation of peridynamics
+# NOSB-PD2D
+## A 2D MATLAB Implementation of Non-Ordinary State-Based Peridynamics
 
-The PDMATLAB2D code is a meshfree peridynamics implementation in MATLAB suitable for simulation of two-dimensional fracture problems. The current version implements a bond-based brittle elastic peridynamic model and a critical stretch criterion for bond breaking. PDMATLAB2D provides an entry-level peridynamics computational tool for educational and training purposes. It also serves as an accessible and easily modifiable computational tool for peridynamics researchers who would like to adapt the code for a multitude of peridynamics simulations.
+**NOSB-PD2D** is an extended, two-dimensional peridynamics computational code developed on the foundation of [ORNL/PDMATLAB2D](https://github.com/ORNL/PDMATLAB2D). This code expands the original framework by implementing the Non-Ordinary State-Based (NOSB) formulation, incorporating stress-based fracture criteria, damping for quasi-static problems, and advanced nodal tracking capabilities.
 
-## Run
+---
 
-Examples can be run by passing an input file to the top-level function:
-```
-PDMATLAB2D('WavePropagation')
-PDMATLAB2D('CrackBranching')
-```
+## Key Features & Modifications
 
-Tests are located in the `Tests/` folder and can be run individually to check individual components.
+Compared to the reference `PDMATLAB2D` code, the primary modifications implemented in this repository include:
 
-Individual plots can be created (as in the paper below) from the `PlottingExamples/` folder. Plots can be easily generated within the folder via the function `PlotPaperFigures'.
+1. **Non-Ordinary State-Based (NOSB) Formulation:**
+   - The force and strain energy density computations (`Forceenergydensity`) have been reformulated to implement the **Non-Ordinary State-Based (NOSB)** peridynamic theory, enabling the use of classical continuum constitutive models within a nonlocal meshfree framework.
+
+2. **Maximum Tensile Stress Failure Criterion:**
+   - The bond breaking logic (`bondbreaking`) has been modified to evaluate bond failure based on a **maximum tensile stress criterion** instead of the conventional critical stretch condition, providing physically consistent crack initiation and propagation analysis.
+
+3. **Quasi-Static Analysis Support:**
+   - Input files and solver routines have been upgraded to include **damping coefficients (damper variables)**, allowing dynamic relaxation to solve quasi-static problems efficiently.
+
+4. **Nodal History Tracking & Plotting:**
+   - The main solver script has been augmented to track, record, and plot response histories (such as kinetic energy density, strain energy density, displacements, and force densities) for selected target nodes across time steps.
+
+---
+
+## How to Run
+
+Simulations are executed by passing the input file name to the top-level driver function:
+```matlab
+NOSBPD2D('CrackBranching')
+
+- Individual component tests are located in the `Tests/` directory.
+- Plotting scripts and post-processing tools are available in the `PlottingExamples/` directory.
+
+---
 
 ## Citing PDMATLAB2D
 
-If you use PDMATLAB2D in your work, please cite the following paper:
-```
+This repository is derived from and builds upon the open-source **PDMATLAB2D** framework. If you use this code in your work, please cite the original reference paper:
+
+bibtex
 @article{Seleson2024,
   author = {Seleson, Pablo and Pasetto, Marco and John, Yohan and Trageser, Jeremy and Reeve, Samuel Temple},
   title = {PDMATLAB2D: A Peridynamics MATLAB Two-dimensional Code},
@@ -29,18 +49,14 @@ If you use PDMATLAB2D in your work, please cite the following paper:
   year = {2024},
   url = {https://doi.org/10.1007/s42102-023-00104-w}
 }
-```
 
-If you would like to cite the software itself, cite the current release from [Zenodo](https://zenodo.org/doi/10.5281/zenodo.7348667).
+If you wish to cite the original software release directly, refer to [Zenodo](https://zenodo.org/doi/10.5281/zenodo.7348667).
 
-## Contributing
-
-We encourage you to contribute to PDMATLAB2D!
-
-When contributing, please first discuss the changes you wish to make via issue (or directly with the PDMATLAB2D developers). Changes should be made through opening a pull request with `main` as the destination branch. Review from at least one developer is required.
-
-PDMATLAB2D is distributed under the terms of the BSD 3-Clause license. All new contributions must be made under this license.
+---
 
 ## License
 
-PDMATLAB2D is distributed under a [BSD 3-Clause license](LICENSE).
+This project is distributed under the terms of the **BSD 3-Clause License**, in compliance with the original upstream software. See the `LICENSE` file for details.
+`
+
+---

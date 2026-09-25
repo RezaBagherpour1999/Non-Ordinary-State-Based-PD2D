@@ -1,4 +1,4 @@
-# NOSB-PD2D
+# Non-Ordinary-State-Based-PD2D
 ## A 2D MATLAB Implementation of Non-Ordinary State-Based Peridynamics
 
 **NOSB-PD2D** is an extended, two-dimensional peridynamics computational code developed on the foundation of [ORNL/PDMATLAB2D](https://github.com/ORNL/PDMATLAB2D). This code expands the original framework by implementing the Non-Ordinary State-Based (NOSB) formulation, incorporating stress-based fracture criteria, damping for quasi-static problems, and advanced nodal tracking capabilities.

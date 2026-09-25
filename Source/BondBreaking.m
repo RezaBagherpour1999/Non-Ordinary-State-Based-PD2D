@@ -1,4 +1,3 @@
-
 % ========================================================================
 % Copyright (c) 2022 by Oak Ridge National Laboratory
 % Modifications Copyright (c) 2026 by Reza Bagherpour
@@ -130,4 +129,3 @@ function [u_NA] = BondBreaking(sigma_bond_stretch_ui,xx,yy,v,w,u_NA,x_hat_NA,y_h
         end
     end
 end
-

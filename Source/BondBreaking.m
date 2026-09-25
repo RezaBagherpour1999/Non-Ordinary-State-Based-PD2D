@@ -1,29 +1,31 @@
 
 % ========================================================================
-% Copyright (c) 2022 by Oak Ridge National Laboratory                      
-% All rights reserved.                                                     
-%                                                                           
-% This file is part of PDMATLAB2D. PDMATLAB2D is distributed under a           
-% BSD 3-clause license. For the licensing terms see the LICENSE file in    
-% the top-level directory.                                                 
-%                                                                          
-% SPDX-License-Identifier: BSD-3-Clause                                    
+% Copyright (c) 2022 by Oak Ridge National Laboratory
+% Modifications Copyright (c) 2026 by Reza Bagherpour
+% All rights reserved.
+%
+% This file is part of NOSB-PD2D (extended from PDMATLAB2D).
+%
+% Distributed under a BSD 3-clause license. For the licensing terms see 
+% the LICENSE file in the top-level directory.
+%
+% SPDX-License-Identifier: BSD-3-Clause
 % ========================================================================
 
 % ========================================================================
-% The function BondBreaking breaks critically stretched bonds, unless they 
-% are connected to a point in a no-fail zone
+% The function BondBreaking breaks critically stressed bonds, unless they 
+% are connected to a point in a no-fail zone.
+% Note: The failure criterion is based on the Maximum Tensile Stress.
 % ========================================================================
 
 % Input
 % -----
+% sigma_bond_stretch_ui : array containing the maximum tensile stress for each bond
 % xx          : x coordinates of all nodes in the grid 
 % yy          : y coordinates of all nodes in the grid 
 % v           : displacement of each node in the x-direction
 % w           : displacement of each node in the y-direction
-% so          : critical stretch
 % u_NA        : array of neighbor numbers for all nodes
-% r_hat_NA    : array of reference lengths of neighbor bonds for all nodes 
 % x_hat_NA    : array of x-coordinates of quadrature points for all nodes
 % y_hat_NA    : array of y-coordinates of quadrature points for all nodes 
 % mask_nofail : Boolean array with a value of 1 for cells in a no-fail zone
@@ -39,7 +41,7 @@
 % The no-fail zone is a region containing points for which bonds connected to
 % them are prevented to fail.
 
-function [u_NA] = BondBreaking(xx,yy,v,w,so,u_NA,r_hat_NA,x_hat_NA,y_hat_NA,mask_nofail)
+function [u_NA] = BondBreaking(sigma_bond_stretch_ui,xx,yy,v,w,u_NA,x_hat_NA,y_hat_NA,mask_nofail)
 
     % Tolerance
     tol = 1E-15;
@@ -94,21 +96,22 @@ function [u_NA] = BondBreaking(xx,yy,v,w,so,u_NA,r_hat_NA,x_hat_NA,y_hat_NA,mask
                 % Get y-component of displacement of node uk
                 wk = w(uk);
 
-                % Get bond ui-uk reference length
-                Rk  = r_hat_NA(ui,z);
-
-                % Compute deformed bond components and length
+                % Compute deformed bond components and length (optional here if not used for failure)
                 rxk = xk_hat-xi + vk-vi;   % x-component of current relative position
                 ryk = yk_hat-yi + wk-wi;   % y-component of current relative position
                 rk2 = rxk^2 + ryk^2;       % current bond length squared
 
-                % Note: the critical stretch condition is:
-                %       s := (sqrt(rk2) - Rk)/Rk >= so
-                %       This is equivalent to the condition
-                %             rk2 >= Rk^2 * (so+1)^2
-                %       because s = sqrt(rk2)/Rk - 1
+                % ---------------------------------------------------------
+                % Maximum Tensile Stress Failure Criterion
+                % ---------------------------------------------------------
+                % A bond is considered failed if the maximum principal 
+                % tensile stress at that bond exceeds the critical stress.
+                % In this specific problem, the critical stress is 10 MPa (10e6).
+                % ---------------------------------------------------------
 
-                if rk2  > ((so+1)*Rk)^2 - tol
+                % if rk2  > ((so+1)*Rk)^2 - tol  % Old stretch-based criterion
+                if  sigma_bond_stretch_ui(ui,z) > 10e6 - tol
+
 
                     % Remove cell uk from neighbor list of node ui
                     u_NA(ui,z) = 0;
@@ -127,3 +130,4 @@ function [u_NA] = BondBreaking(xx,yy,v,w,so,u_NA,r_hat_NA,x_hat_NA,y_hat_NA,mask
         end
     end
 end
+
